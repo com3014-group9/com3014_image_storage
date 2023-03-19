@@ -20,6 +20,16 @@ class GreeterStub(object):
                 request_serializer=protos_dot_hello__pb2.HelloRequest.SerializeToString,
                 response_deserializer=protos_dot_hello__pb2.StringResponse.FromString,
                 )
+        self.UploadFile = channel.stream_unary(
+                '/Greeter/UploadFile',
+                request_serializer=protos_dot_hello__pb2.UploadFileRequest.SerializeToString,
+                response_deserializer=protos_dot_hello__pb2.StringResponse.FromString,
+                )
+        self.DownloadFile = channel.unary_stream(
+                '/Greeter/DownloadFile',
+                request_serializer=protos_dot_hello__pb2.MetaData.SerializeToString,
+                response_deserializer=protos_dot_hello__pb2.FileResponse.FromString,
+                )
 
 
 class GreeterServicer(object):
@@ -27,8 +37,19 @@ class GreeterServicer(object):
     """
 
     def SayHello(self, request, context):
-        """Sends a greeting
-        """
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UploadFile(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DownloadFile(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -40,6 +61,16 @@ def add_GreeterServicer_to_server(servicer, server):
                     servicer.SayHello,
                     request_deserializer=protos_dot_hello__pb2.HelloRequest.FromString,
                     response_serializer=protos_dot_hello__pb2.StringResponse.SerializeToString,
+            ),
+            'UploadFile': grpc.stream_unary_rpc_method_handler(
+                    servicer.UploadFile,
+                    request_deserializer=protos_dot_hello__pb2.UploadFileRequest.FromString,
+                    response_serializer=protos_dot_hello__pb2.StringResponse.SerializeToString,
+            ),
+            'DownloadFile': grpc.unary_stream_rpc_method_handler(
+                    servicer.DownloadFile,
+                    request_deserializer=protos_dot_hello__pb2.MetaData.FromString,
+                    response_serializer=protos_dot_hello__pb2.FileResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -66,5 +97,39 @@ class Greeter(object):
         return grpc.experimental.unary_unary(request, target, '/Greeter/SayHello',
             protos_dot_hello__pb2.HelloRequest.SerializeToString,
             protos_dot_hello__pb2.StringResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def UploadFile(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(request_iterator, target, '/Greeter/UploadFile',
+            protos_dot_hello__pb2.UploadFileRequest.SerializeToString,
+            protos_dot_hello__pb2.StringResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def DownloadFile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/Greeter/DownloadFile',
+            protos_dot_hello__pb2.MetaData.SerializeToString,
+            protos_dot_hello__pb2.FileResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
