@@ -4,20 +4,6 @@ from typing import ClassVar as _ClassVar, Mapping as _Mapping, Optional as _Opti
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
-class FileResponse(_message.Message):
-    __slots__ = ["chunk_data"]
-    CHUNK_DATA_FIELD_NUMBER: _ClassVar[int]
-    chunk_data: bytes
-    def __init__(self, chunk_data: _Optional[bytes] = ...) -> None: ...
-
-class HelloRequest(_message.Message):
-    __slots__ = ["age", "name"]
-    AGE_FIELD_NUMBER: _ClassVar[int]
-    NAME_FIELD_NUMBER: _ClassVar[int]
-    age: int
-    name: str
-    def __init__(self, name: _Optional[str] = ..., age: _Optional[int] = ...) -> None: ...
-
 class MetaData(_message.Message):
     __slots__ = ["extension", "filename"]
     EXTENSION_FIELD_NUMBER: _ClassVar[int]
