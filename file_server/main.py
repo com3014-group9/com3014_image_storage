@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, send_file, request, redirect, url_for
+from flask import Flask, send_from_directory, send_file, request, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 import pprint
@@ -13,6 +13,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def build_url_from_path(filepath):
+    return "/images/" + filepath.split('\\')[-1]
 
 @app.route('/images/upload', methods=['GET', 'POST'])
 def upload_file():
@@ -57,8 +60,34 @@ def get_last_user_image(owner):
 
     if image == None:
         return send_from_directory("../images", "xdd.png")
-        
+
     return send_file("..\\" + image["path"])
+
+@app.route('/images/user/<owner>')
+def get_user_images(owner):
+    start = int(request.args.get('from'))
+    stop = int(request.args.get('to'))
+
+    cur = image_db.image_data.find({"owner" : owner}, sort=[("timestamp", -1)]).skip(start).limit(stop)
+
+    images = []
+    for doc in cur:
+        images.append(build_url_from_path(doc["path"]))
+
+    return jsonify(images)
+
+@app.route('/images/tag/<tag>')
+def get_images_by_tag(tag):
+    start = int(request.args.get('from'))
+    stop = int(request.args.get('to'))
+
+    cur = image_db.image_data.find({"tags" : {"$in" : [tag]}}, sort=[("timestamp", -1)]).skip(start).limit(stop)
+
+    images = []
+    for doc in cur:
+        images.append(build_url_from_path(doc["path"]))
+
+    return jsonify(images)
 
 @app.errorhandler(404)
 def page_not_found(e):
