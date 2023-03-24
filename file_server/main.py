@@ -68,7 +68,7 @@ def get_user_images(owner):
     start = int(request.args.get('from'))
     stop = int(request.args.get('to'))
 
-    cur = image_db.image_data.find({"owner" : owner}, sort=[("timestamp", -1)]).skip(start).limit(stop)
+    cur = image_db.image_data.find({"owner" : owner}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
 
     images = []
     for doc in cur:
@@ -81,7 +81,7 @@ def get_images_by_tag(tag):
     start = int(request.args.get('from'))
     stop = int(request.args.get('to'))
 
-    cur = image_db.image_data.find({"tags" : {"$in" : [tag]}}, sort=[("timestamp", -1)]).skip(start).limit(stop)
+    cur = image_db.image_data.find({"tags" : {"$in" : [tag]}}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
 
     images = []
     for doc in cur:
