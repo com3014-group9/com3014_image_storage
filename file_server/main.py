@@ -5,7 +5,7 @@ import pprint
 import os
 import time
 
-UPLOAD_FOLDER = '../images'
+UPLOAD_FOLDER = 'images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -40,35 +40,35 @@ def upload_file():
 
             file.save(filepath)
 
-            return send_from_directory("../images", filename)
+            return send_from_directory("images", filename)
 
 @app.route('/images/<filename>')
 def get_image(filename):
-    return send_from_directory("../images", filename)
+    return send_from_directory("images", filename)
 
 @app.route('/images/id/<id>')
 def get_image_by_id(id):
     image = image_db.image_data.find_one({"id" : int(id)})
 
     if image == None:
-        return send_from_directory("../images", "xdd.png")
-    return send_file("..\\" + image["path"])
+        return send_from_directory("images", "xdd.png")
+    return send_file(image["path"])
 
 @app.route('/images/user/latest/<owner>')
 def get_last_user_image(owner):
     image = image_db.image_data.find_one({"owner" : owner}, sort=[("timestamp", -1)])
 
     if image == None:
-        return send_from_directory("../images", "xdd.png")
+        return send_from_directory("images", "xdd.png")
 
-    return send_file("..\\" + image["path"])
+    return send_file(image["path"])
 
 @app.route('/images/user/<owner>')
 def get_user_images(owner):
     start = int(request.args.get('from'))
     stop = int(request.args.get('to'))
 
-    cur = image_db.image_data.find({"owner" : owner}, sort=[("timestamp", -1)]).skip(start).limit(stop)
+    cur = image_db.image_data.find({"owner" : owner}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
 
     images = []
     for doc in cur:
@@ -81,7 +81,7 @@ def get_images_by_tag(tag):
     start = int(request.args.get('from'))
     stop = int(request.args.get('to'))
 
-    cur = image_db.image_data.find({"tags" : {"$in" : [tag]}}, sort=[("timestamp", -1)]).skip(start).limit(stop)
+    cur = image_db.image_data.find({"tags" : {"$in" : [tag]}}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
 
     images = []
     for doc in cur:
@@ -91,9 +91,18 @@ def get_images_by_tag(tag):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return send_from_directory("../images", "xdd.png")
+    return send_from_directory("images", "xdd.png")
+
+def get_db():
+    client = MongoClient(host='test_mongodb',
+                         port=27017, 
+                         username='root', 
+                         password='pass',
+                        authSource="admin")
+
+    db = client.com3014_images
+    return db
 
 if __name__ == "__main__":
-    client = MongoClient("mongodb://localhost:27017")
-    image_db = client.com3014_images
-    app.run(debug=True)
+    image_db = get_db()
+    app.run(debug=True, host="0.0.0.0", port=5000)
