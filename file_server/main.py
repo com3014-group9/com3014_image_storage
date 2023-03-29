@@ -17,36 +17,41 @@ def allowed_file(filename):
 def build_url_from_path(filepath):
     return "/images/" + filepath.split('\\')[-1]
 
-@app.route('/images/upload', methods=['GET', 'POST'])
+# Upload image to the backend and save a path to it to the database
+@app.route('/images/upload', methods=['POST'])
 def upload_file():
-    if request.method == 'POST':
-        if 'file' not in request.files:
-            return redirect(request.url)
-        file = request.files['file']
+    if 'file' not in request.files:
+        return redirect(request.url)
+    file = request.files['file']
 
-        if file.filename == '':
-            return redirect(request.url)
+    if file.filename == '':
+        return redirect(request.url)
 
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            id = image_db.image_data.find_one(sort=[("id", -1)])
-            id = id["id"] + 1 if id != None else 0
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        id = image_db.image_data.find_one(sort=[("id", -1)])
+        id = id["id"] + 1 if id != None else 0
 
-            tags = request.form['tags'].split(" ")
-            print(tags)
+        tags = request.form['tags'].split(" ")
+        print(tags)
 
-            image_db.image_data.insert_one({"path" : filepath, "id" : id, "owner" : request.form['owner'], "tags" : tags, "timestamp" : int(time.time())})
+        image_db.image_data.insert_one({"path" : filepath, "id" : id, "owner" : request.form['owner'], "tags" : tags, "timestamp" : int(time.time())})
 
-            file.save(filepath)
+        file.save(filepath)
 
-            return send_from_directory("images", filename)
+        return send_from_directory("images", filename)
 
-@app.route('/images/<filename>')
+# Get image using its filename
+@app.route('/images/<filename>', methods=['GET'])
 def get_image(filename):
-    return send_from_directory("images", filename)
+    if os.path.isfile(f"images/{filename}"):
+        return send_from_directory("images", filename)
+    else:
+        return send_from_directory("images", "xdd.png")
 
-@app.route('/images/id/<id>')
+# Get image using its id
+@app.route('/images/id/<id>', methods=['GET'])
 def get_image_by_id(id):
     image = image_db.image_data.find_one({"id" : int(id)})
 
@@ -54,7 +59,8 @@ def get_image_by_id(id):
         return send_from_directory("images", "xdd.png")
     return send_file(image["path"])
 
-@app.route('/images/user/latest/<owner>')
+# Get last image posted by the user
+@app.route('/images/user/latest/<owner>', methods=['GET'])
 def get_last_user_image(owner):
     image = image_db.image_data.find_one({"owner" : owner}, sort=[("timestamp", -1)])
 
@@ -63,31 +69,39 @@ def get_last_user_image(owner):
 
     return send_file(image["path"])
 
-@app.route('/images/user/<owner>')
+# Get all images posted by the user
+@app.route('/images/user/<owner>', methods=['GET'])
 def get_user_images(owner):
     start = int(request.args.get('from'))
     stop = int(request.args.get('to'))
 
     cur = image_db.image_data.find({"owner" : owner}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
 
-    images = []
-    for doc in cur:
-        images.append(build_url_from_path(doc["path"]))
+    if len(list(cur)) > 0:
+        images = []
+        for doc in cur:
+            images.append(build_url_from_path(doc["path"]))
 
-    return jsonify(images)
+        return jsonify(images)
+    else:
+        return send_from_directory("images", "xdd.png")
 
-@app.route('/images/tag/<tag>')
+# Get all images posted under the specified tag
+@app.route('/images/tag/<tag>', methods=['GET'])
 def get_images_by_tag(tag):
     start = int(request.args.get('from'))
     stop = int(request.args.get('to'))
 
     cur = image_db.image_data.find({"tags" : {"$in" : [tag]}}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
 
-    images = []
-    for doc in cur:
-        images.append(build_url_from_path(doc["path"]))
+    if len(list(cur)) > 0:
+        images = []
+        for doc in cur:
+            images.append(build_url_from_path(doc["path"]))
 
-    return jsonify(images)
+        return jsonify(images)
+    else:
+        return send_from_directory("images", "xdd.png")
 
 @app.errorhandler(404)
 def page_not_found(e):
