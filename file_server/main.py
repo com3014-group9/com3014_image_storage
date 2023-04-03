@@ -15,6 +15,8 @@ def create_app():
     app.register_blueprint(imager)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+    app.teardown_appcontext_funcs.append(close_db)
+
     return app
 
 # Connect to a mongo database and get the images collections
@@ -27,11 +29,18 @@ def get_db_client():
 
     return client
 
+# Connect to DB and store in context
 def get_db():
     if 'db' not in g:
         g.db = get_db_client()
     
     return g.db.com3014_images  
+
+# Disconnect from DB if we are connected
+def close_db(exception):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
 
 
 # Check if the file is allowed (i.e., it has an image extension)
@@ -48,11 +57,15 @@ def build_url_from_path(filepath):
 @imager.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return redirect(request.url)
+         return {"error" : "Missing image"}, 400
+
     file = request.files['file']
     
     if file.filename == '':
-        return redirect(request.url)
+        return {"error" : "Empty filename"}, 400
+
+    if "owner" not in request.form or "tags" not in request.form:
+        return {"error" : "Missing fields"}, 400
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -68,24 +81,27 @@ def upload_file():
 
         return {"file": filename}, 201
     else:
-        return {"error": "Invalid file type"}, 404
+        return {"error": "Invalid file type"}, 400
 
 # Get image using its filename
 @imager.route('/<filename>', methods=['GET'])
 def get_image(filename):
     if os.path.isfile(f"images/{filename}"):
-        return send_from_directory("images", filename)
+        return send_from_directory("images", filename), 200
     else:
-        return send_from_directory("images", "xdd.png")
+        return send_from_directory("images", "xdd.png"), 404
 
 # Get image using its id
 @imager.route('/id/<id>', methods=['GET'])
 def get_image_by_id(id):
     image = get_db().image_data.find_one({"id" : int(id)})
-
+    cur = get_db().image_data.find({})
+    print(len(list(cur)))
+    for each in cur:
+        print(each)
     if image == None:
-        return send_from_directory("images", "xdd.png")
-    return send_file(image["path"])
+        return send_from_directory("images", "xdd.png"), 404
+    return send_file(image["path"]), 200
 
 # Get last image posted by the user
 @imager.route('/user/latest/<owner>', methods=['GET'])
@@ -100,36 +116,50 @@ def get_last_user_image(owner):
 # Get all images posted by the user
 @imager.route('/user/<owner>', methods=['GET'])
 def get_user_images(owner):
-    start = int(request.args.get('from'))
-    stop = int(request.args.get('to'))
+    if 'from' not in request.args:
+        start = 0
+    else:
+        start = int(request.args.get('from'))
+    
+    if 'to' not in request.args:
+        stop = 50
+    else:
+        stop = int(request.args.get('to'))
 
     cur = get_db().image_data.find({"owner" : owner}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
+    meow = list(cur)
 
-    if len(list(cur)) > 0:
+    if len(meow) > 0:
         images = []
-        for doc in cur:
+        for doc in meow:
             images.append(build_url_from_path(doc["path"]))
-
-        return jsonify(images)
+        return {'images' : images}, 200
     else:
-        return send_from_directory("images", "xdd.png")
+        return send_from_directory("images", "xdd.png"), 404
 
 # Get all images posted under the specified tag
 @imager.route('/tag/<tag>', methods=['GET'])
 def get_images_by_tag(tag):
-    start = int(request.args.get('from'))
-    stop = int(request.args.get('to'))
+    if 'from' not in request.args:
+        start = 0
+    else:
+        start = int(request.args.get('from'))
+    
+    if 'to' not in request.args:
+        stop = 50
+    else:
+        stop = int(request.args.get('to'))
 
     cur = get_db().image_data.find({"tags" : {"$in" : [tag]}}, sort=[("timestamp", -1)]).skip(start).limit(stop-start)
-
-    if len(list(cur)) > 0:
+    meow = list(cur)
+    
+    if len(meow) > 0:
         images = []
-        for doc in cur:
+        for doc in meow:
             images.append(build_url_from_path(doc["path"]))
-
-        return jsonify(images)
+        return {'images' : images}, 200
     else:
-        return send_from_directory("images", "xdd.png")
+        return send_from_directory("images", "xdd.png"), 404
 
 # Instead of default 404 page, send the xdd image to a user
 @imager.errorhandler(404)
