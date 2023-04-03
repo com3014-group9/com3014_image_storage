@@ -7,13 +7,31 @@ import time
 
 UPLOAD_FOLDER = 'images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+def create_app():
+    app = Flask(__name__)
+    app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+    return app
+
+# Connect to a mongo database and get the images collections
+def get_db():
+    client = MongoClient(host='test_mongodb',
+                         port=27017, 
+                         username='root', 
+                         password='pass',
+                        authSource="admin")
+
+    db = client.com3014_images
+    return db
+
+# Check if the file is allowed (i.e., it has an image extension)
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# The helper function for taking a path and returning a URL to an image
+# this is useful for queries that return multiple images at once
 def build_url_from_path(filepath):
     return "/images/" + filepath.split('\\')[-1]
 
@@ -103,20 +121,12 @@ def get_images_by_tag(tag):
     else:
         return send_from_directory("images", "xdd.png")
 
+# Instead of default 404 page, send the xdd image to a user
 @app.errorhandler(404)
 def page_not_found(e):
     return send_from_directory("images", "xdd.png")
 
-def get_db():
-    client = MongoClient(host='test_mongodb',
-                         port=27017, 
-                         username='root', 
-                         password='pass',
-                        authSource="admin")
-
-    db = client.com3014_images
-    return db
-
 if __name__ == "__main__":
     image_db = get_db()
+    app = create_app()
     app.run(debug=True, host="0.0.0.0", port=5000)
