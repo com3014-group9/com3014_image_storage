@@ -5,6 +5,8 @@ import pprint
 import os
 import time
 
+from file_server.auth_middleware import auth_required
+
 UPLOAD_FOLDER = 'images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
@@ -55,7 +57,8 @@ def build_url_from_path(filepath):
 
 # Upload image to the backend and save a path to it to the database
 @imager.route('/upload', methods=['POST'])
-def upload_file():
+@auth_required
+def upload_file(user_id):
     if 'file' not in request.files:
          return {"error" : "Missing image"}, 400
 
@@ -85,7 +88,8 @@ def upload_file():
 
 # Get image using its filename
 @imager.route('/<filename>', methods=['GET'])
-def get_image(filename):
+@auth_required
+def get_image(user_id, filename):
     if os.path.isfile(f"images/{filename}"):
         return send_from_directory("images", filename), 200
     else:
@@ -93,7 +97,8 @@ def get_image(filename):
 
 # Get image using its id
 @imager.route('/id/<id>', methods=['GET'])
-def get_image_by_id(id):
+@auth_required
+def get_image_by_id(user_id, id):
     image = get_db().image_data.find_one({"id" : int(id)})
     cur = get_db().image_data.find({})
     print(len(list(cur)))
@@ -105,7 +110,8 @@ def get_image_by_id(id):
 
 # Get last image posted by the user
 @imager.route('/user/latest/<owner>', methods=['GET'])
-def get_last_user_image(owner):
+@auth_required
+def get_last_user_image(user_id, owner):
     image = get_db().image_data.find_one({"owner" : owner}, sort=[("timestamp", -1)])
 
     if image == None:
@@ -115,7 +121,8 @@ def get_last_user_image(owner):
 
 # Get all images posted by the user
 @imager.route('/user/<owner>', methods=['GET'])
-def get_user_images(owner):
+@auth_required
+def get_user_images(user_id, owner):
     if 'from' not in request.args:
         start = 0
     else:
@@ -139,7 +146,8 @@ def get_user_images(owner):
 
 # Get all images posted under the specified tag
 @imager.route('/tag/<tag>', methods=['GET'])
-def get_images_by_tag(tag):
+@auth_required
+def get_images_by_tag(user_id, tag):
     if 'from' not in request.args:
         start = 0
     else:
