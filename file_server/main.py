@@ -5,7 +5,7 @@ import pprint
 import os
 import time
 
-from file_server.auth_middleware import auth_required
+from auth_middleware import auth_required
 
 UPLOAD_FOLDER = 'images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -177,4 +177,4 @@ def page_not_found(e):
 if __name__ == "__main__":
     image_db = get_db_client().com3014_images
     app = create_app()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5050)
