@@ -3,7 +3,7 @@ import mongomock
 import io
 from unittest.mock import patch
 import requests
-from file_server import main
+import main
 
 from .helpers import generate_access_token
 
