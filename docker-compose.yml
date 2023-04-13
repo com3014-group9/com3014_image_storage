@@ -1,14 +1,16 @@
 services:
-  app:
-    build: .
+  imager-app:
+    build:
+      context: ../com3014_image_storage
+      dockerfile: Dockerfile.imager
     command: python -u main.py
     ports:
-      - "5000:5000"
+      - "5050:5050"
     volumes:
-      - .:/imager
+      - ./file_server:/imager
     links:
-      - db
-  db:
+      - imager-db
+  imager-db:
     image: mongo:latest
     hostname: test_mongodb
     environment:
