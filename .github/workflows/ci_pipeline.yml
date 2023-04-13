@@ -1,0 +1,57 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@As0biAsobase 
+com3014-group9
+/
+com3014_auth
+Public
+Fork your own copy of com3014-group9/com3014_auth
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+com3014_auth/.github/workflows/ci_pipeline.yml
+@cdigby
+cdigby Remove gitlab-ci.yml, create github actions pipeline
+Latest commit 6986dee 16 hours ago
+ History
+ 1 contributor
+39 lines (26 sloc)  579 Bytes
+ 
+
+
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+  pull_request:
+    branches:
+      - main
+      - dev
+
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+    - name: Build Docker Image
+      run: docker compose build
+    - name: Run Unit Tests
+      run: docker compose run imager-app python3 -m pytest
+    
