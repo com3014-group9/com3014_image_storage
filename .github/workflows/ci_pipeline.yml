@@ -1,34 +1,3 @@
-Skip to content
-Search or jump to…
-Pull requests
-Issues
-Codespaces
-Marketplace
-Explore
- 
-@As0biAsobase 
-com3014-group9
-/
-com3014_auth
-Public
-Fork your own copy of com3014-group9/com3014_auth
-Code
-Issues
-Pull requests
-Actions
-Projects
-Security
-Insights
-com3014_auth/.github/workflows/ci_pipeline.yml
-@cdigby
-cdigby Remove gitlab-ci.yml, create github actions pipeline
-Latest commit 6986dee 16 hours ago
- History
- 1 contributor
-39 lines (26 sloc)  579 Bytes
- 
-
-
 name: CI Pipeline
 
 on:
