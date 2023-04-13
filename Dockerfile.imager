@@ -12,6 +12,5 @@ RUN pip3 install -r requirements.txt
 EXPOSE 5050
 
 COPY ./file_server .
-COPY test.jpg test.jpg
 
 # CMD [ "flask", "run" ]

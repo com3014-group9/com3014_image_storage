@@ -53,7 +53,7 @@ def allowed_file(filename):
 # The helper function for taking a path and returning a URL to an image
 # this is useful for queries that return multiple images at once
 def build_url_from_path(filepath):
-    return "/images/" + filepath.split('\\')[-1]
+    return  "/" + filepath.split('\\')[-1]
 
 # Upload image to the backend and save a path to it to the database
 @imager.route('/upload', methods=['POST'])
