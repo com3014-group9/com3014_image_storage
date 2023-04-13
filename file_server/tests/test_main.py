@@ -22,7 +22,7 @@ def access_header():
 
 #Test function to test the upload_file function
 def test_upload_file_1(client, access_header):
-    file = "../test.jpg"
+    file = "test.jpg"
     data = {
         'file': (open(file, 'rb'), file),
         'tags' : "meow cat cute",
@@ -35,7 +35,7 @@ def test_upload_file_1(client, access_header):
 
 #Test function to test the upload_file function if tags are missing
 def test_upload_file_2(client, access_header):
-    file = "../test.jpg"
+    file = "test.jpg"
     data = {
         'file': (open(file, 'rb'), file),
         'owner' : "111"
@@ -47,7 +47,7 @@ def test_upload_file_2(client, access_header):
 
 #Test function to test the upload_file function if owner is missing
 def test_upload_file_3(client, access_header):
-    file = "../test.jpg"
+    file = "test.jpg"
     data = {
         'file': (open(file, 'rb'), file),
         'tags' : "meow cat cute"
@@ -71,7 +71,7 @@ def test_get_image_2(client, access_header):
 
 #Test function to test get_image_by_id function
 def test_get_image_byid_1(client, access_header):
-    file = "../test.jpg"
+    file = "test.jpg"
     data = {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"}
     client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
     response = client.get('/images/id/0', headers=access_header)
@@ -86,7 +86,7 @@ def test_get_image_byid_2(client, access_header):
 
 # Testing get_user_images function
 def test_get_user_images_1(client, access_header):
-    file = "../test.jpg"
+    file = "test.jpg"
     data = [
         {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"},
         {'file': (open(file, 'rb'), file), 'tags' : "dog meme funny", 'owner' : "111"},
@@ -110,7 +110,7 @@ def test_get_user_images_1(client, access_header):
 
 # Testing get_images_by_tag function
 def test_get_images_by_tag(client, access_header):
-    file = "../test.jpg"
+    file = "test.jpg"
     data = [
         {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"},
         {'file': (open(file, 'rb'), file), 'tags' : "dog meme funny", 'owner' : "111"},
