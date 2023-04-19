@@ -10,8 +10,8 @@ on:
     branches:
       - main
       - development
-
-  workflow_dispatch:
+  repository-dispatch:
+  
 
 jobs:
   build-and-test:
@@ -23,4 +23,18 @@ jobs:
       run: docker compose build
     - name: Run Unit Tests
       run: docker compose run imager-app python3 -m pytest
-    
+    - name: Trigger Main Workflow
+      if: github.ref == 'refs/heads/main'
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        repository: com3014-group9/com3014_meowstagram
+        token: ${{ secrets.PAT }}
+        event-type: trigger-build
+  build-all:
+    name: Repository Dispatch
+    uses: peter-evans/repository-dispatch@v2
+    with:
+      token: ${{ secrets.PAT }}
+      repository: username/my-repo
+      event-type: my-event
+  - name: Trigger Main Workflow if: github.ref == 'refs/heads/main' uses: peter-evans/repository-dispatch@v2 with: repository: com3014-group9/com3014_meowstagram token: ${{ secrets.PAT }} event-type: trigger-build
