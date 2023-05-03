@@ -78,7 +78,15 @@ def upload_file(user_id):
 
         tags = request.form['tags'].split(" ")
 
-        get_db().image_data.insert_one({"path" : filepath, "id" : id, "owner" : request.form['owner'], "tags" : tags, "timestamp" : int(time.time())})
+        get_db().image_data.insert_one({
+            "path" : filepath, 
+            "id" : id, 
+            "owner" : request.form['owner'], 
+            "tags" : tags, 
+            "timestamp" : int(time.time()),
+            "likes" : 0,
+            "liked_by" : []
+        })
         
         file.save(filepath)
 
@@ -94,6 +102,42 @@ def get_image(user_id, filename):
         return send_from_directory("images", filename), 200
     else:
         return send_from_directory("images", "xdd.png"), 404
+
+@imager.route('/like', methods=['POST'])
+@auth_required
+def like_image(user_id):
+    image_id =  request.form["image_id"]
+    image = get_db().image_data.find_one({"id" : int(image_id)})
+
+    if image == None:
+        return {"error": "Image not found"}, 400
+
+    if user_id in image["liked_by"]:
+        return {"error": "You already liked this image"}, 401
+    
+    query = { "id": image_id }
+    values = {'$push': {'liked_by' : user_id}}
+    get_db().image_data.update_one(query, values)
+    values = {'$inc': {"likes": 1} }
+    get_db().image_data.update_one(query, values)
+
+@imager.route('/unlike', methods=['POST'])
+@auth_required
+def unlike_image(user_id):
+    image_id =  request.form["image_id"]
+    image = get_db().image_data.find_one({"id" : int(image_id)})
+
+    if image == None:
+        return {"error": "Image not found"}, 400
+
+    if user_id not in image["liked_by"]:
+        return {"error": "You didn't like this image"}, 401
+    
+    query = { "id": image_id }
+    values = {'$pull': {'liked_by' : user_id}}
+    get_db().image_data.update_one(query, values)
+    values = {'$inc': {"likes": -1} }
+    get_db().image_data.update_one(query, values)
 
 # Get image using its id
 @imager.route('/id/<id>', methods=['GET'])
