@@ -57,6 +57,41 @@ def test_upload_file_3(client, access_header):
     assert response.status_code == 400
     assert response.json['error'] == "Missing fields"
 
+#Test function for like_image function
+def test_like_image_1(client, access_header):
+    file = "test.jpg"
+    data = {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"}
+    client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
+    data = {'image_id': 0}
+    response = client.post('/images/like', data=data, headers=access_header)
+    
+    assert response.status_code == 200
+
+#Test function for like_image function
+def test_like_image_2(client, access_header):
+    data = {'image_id': 0}
+    response = client.post('/images/like', data=data, headers=access_header)
+    
+    assert response.status_code == 404
+
+#Test function for the like/unlike flow
+def test_like_image_3(client, access_header):
+    file = "test.jpg"
+    data = {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"}
+    client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
+    data = {'image_id': 0}
+    response = client.post('/images/unlike', data=data, headers=access_header)
+    assert response.status_code == 401
+
+    response = client.post('/images/like', data=data, headers=access_header)
+    assert response.status_code == 200
+
+    response = client.post('/images/unlike', data=data, headers=access_header)
+    assert response.status_code == 200 
+
+    response = client.post('/images/unlike', data=data, headers=access_header)
+    assert response.status_code == 401
+
 #Test function to test get_image function
 def test_get_image_1(client, access_header):
     response = client.get('/images/test.jpg', headers=access_header)

@@ -106,11 +106,11 @@ def get_image(user_id, filename):
 @imager.route('/like', methods=['POST'])
 @auth_required
 def like_image(user_id):
-    image_id =  request.form["image_id"]
-    image = get_db().image_data.find_one({"id" : int(image_id)})
+    image_id =  int(request.form["image_id"])
+    image = get_db().image_data.find_one({"id" : image_id})
 
     if image == None:
-        return {"error": "Image not found"}, 400
+        return {"error": "Image not found"}, 404
 
     if user_id in image["liked_by"]:
         return {"error": "You already liked this image"}, 401
@@ -121,14 +121,16 @@ def like_image(user_id):
     values = {'$inc': {"likes": 1} }
     get_db().image_data.update_one(query, values)
 
+    return {"message": "You liked this image"}, 200
+
 @imager.route('/unlike', methods=['POST'])
 @auth_required
 def unlike_image(user_id):
-    image_id =  request.form["image_id"]
-    image = get_db().image_data.find_one({"id" : int(image_id)})
+    image_id =  int(request.form["image_id"])
+    image = get_db().image_data.find_one({"id" : image_id})
 
     if image == None:
-        return {"error": "Image not found"}, 400
+        return {"error": "Image not found"}, 404
 
     if user_id not in image["liked_by"]:
         return {"error": "You didn't like this image"}, 401
@@ -138,6 +140,8 @@ def unlike_image(user_id):
     get_db().image_data.update_one(query, values)
     values = {'$inc': {"likes": -1} }
     get_db().image_data.update_one(query, values)
+
+    return {"message" : "You unliked this image"}, 200
 
 # Get image using its id
 @imager.route('/id/<id>', methods=['GET'])
