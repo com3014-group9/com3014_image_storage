@@ -16,7 +16,7 @@ Automatic testing is handled by pytest. To run the tests, build and start the co
 
 ## Endpoints
 
-**/images/upload** Params: None
+### **/images/upload** [AUTHENTICATED] Params: None
 
 Uploads image to the backend storage. Form-data:
 
@@ -26,35 +26,35 @@ Uploads image to the backend storage. Form-data:
 
 Creates a database entry with provided owner and tags, the path to the uploaded file, incremented id and a timestamp.
 
-**/images/<filename>** [AUTHENTICATED] Params: None
+### **/images/<filename>** [AUTHENTICATED] Params: None
 
 Returns an image stored under <filename>.
 
-**/images/like** [AUTHENTICATED] Params: None
+### **/images/like** [AUTHENTICATED] Params: None
 
 Adds like to the image. Form-data:
 
 - image_id - id of the image to like
 
-**/images/unlike** [AUTHENTICATED] Params: None
+### **/images/unlike** [AUTHENTICATED] Params: None
 
 Removes like to the image. Form-data:
 
 - image_id - id of the image to unlike
 
-**/images/id/<id>** [AUTHENTICATED] Params: None
+### **/images/id/<id>** [AUTHENTICATED] Params: None
 
 Returns an image associated with <id>
 
-**/images/user/latest/<owner>** [AUTHENTICATED] Params: None
+### **/images/user/latest/<owner>** [AUTHENTICATED] Params: None
 
 Returns last image uploaded by <owner>
 
-**/images/user/<owner>** [AUTHENTICATED] Params: to, from
+### **/images/user/<owner>** [AUTHENTICATED] Params: to, from
 
 Returns a list of image URLs uploaded by the specified <owner>.
 
-**/images/tag/<tag>** [AUTHENTICATED] Params: to, from
+### **/images/tag/<tag>** [AUTHENTICATED] Params: to, from
 
 Returns a list of image URLs associated with a specified <tag>.
 
