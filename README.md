@@ -60,14 +60,12 @@ Returns a list of image URLs associated with a specified <tag>.
 
 ## DB Schema
 
-Service uses MongoDB with the following schema:
+Service uses MongoDB with which stores the following metadata about the images:
 
-- **id**: int32 - unique id of an image, increments one by one on each upload
+- **id**: int - unique id of an image, increments one by one on each upload
 - **owner**: string - the name of a user who uploaded the image
 - **path**: string - path to the image in internal storage
 - **tags**: array - list of tags associated with each image
-- **timestamp**: int32 - UNIX timestamp for when the image was uploaded
-
-## Docker
-
-Image Server - `docker run -d -p 5000:5000 imager-docker`
+- **timestamp**: int - UNIX timestamp for when the image was uploaded
+- **likes**: int - number of likes for that specific image
+- **liked_by**: array - list of all users who liked the image
