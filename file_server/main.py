@@ -1,19 +1,19 @@
 from flask import Flask, send_from_directory, send_file, request, redirect, url_for, jsonify, Blueprint, current_app, g
 from werkzeug.utils import secure_filename
 from pymongo import MongoClient
-import pprint
 import os
 import time
-
+import requests
+from flask_cors import CORS
 from auth_middleware import auth_required
 
 UPLOAD_FOLDER = 'images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
 
 imager = Blueprint('imager', __name__, url_prefix='/images')
-
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     app.register_blueprint(imager)
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -53,7 +53,8 @@ def allowed_file(filename):
 # The helper function for taking a path and returning a URL to an image
 # this is useful for queries that return multiple images at once
 def build_url_from_path(filepath):
-    return  "/" + filepath.split('\\')[-1]
+    base_url = "http://localhost:5050"
+    return  base_url + "/" + filepath.split('\\')[-1]
 
 # Upload image to the backend and save a path to it to the database
 @imager.route('/upload', methods=['POST'])
@@ -106,7 +107,7 @@ def get_image(user_id, filename):
 @imager.route('/like', methods=['POST'])
 @auth_required
 def like_image(user_id):
-    image_id =  int(request.form["image_id"])
+    image_id =  int(request.get_json().get("image_id"))
     image = get_db().image_data.find_one({"id" : image_id})
 
     if image == None:
@@ -126,7 +127,7 @@ def like_image(user_id):
 @imager.route('/unlike', methods=['POST'])
 @auth_required
 def unlike_image(user_id):
-    image_id =  int(request.form["image_id"])
+    image_id =  int(request.get_json().get("image_id"))
     image = get_db().image_data.find_one({"id" : image_id})
 
     if image == None:
@@ -142,6 +143,7 @@ def unlike_image(user_id):
     get_db().image_data.update_one(query, values)
 
     return {"message" : "You unliked this image"}, 200
+
 
 # Get image using its id
 @imager.route('/id/<id>', methods=['GET'])
