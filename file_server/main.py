@@ -4,6 +4,7 @@ from pymongo import MongoClient
 import pprint
 import os
 import time
+import requests
 
 from auth_middleware import auth_required
 
@@ -76,7 +77,13 @@ def upload_file(user_id):
         id = get_db().image_data.find_one(sort=[("id", -1)])
         id = id["id"] + 1 if id != None else 0
 
-        tags = request.form['tags'].split(" ")
+        #tags = request.form['tags'].split(" ")
+
+         # Call the other microservice and get a string value returned
+        files = {'file': file.read()}
+        #Replace the following link with whatever it gets assigned to by the docker (it should be local host by default or the app's name)
+        response = requests.post('http://localhost:3303/get_tags', files=files)
+        tags = response.text.strip()
 
         get_db().image_data.insert_one({"path" : filepath, "id" : id, "owner" : request.form['owner'], "tags" : tags, "timestamp" : int(time.time())})
         
