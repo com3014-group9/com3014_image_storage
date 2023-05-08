@@ -3,9 +3,14 @@ from werkzeug.utils import secure_filename
 from pymongo import MongoClient
 import os
 import time
+import io
 import requests
 from flask_cors import CORS
 from auth_middleware import auth_required
+from PIL import Image
+
+from urllib3.exceptions import NewConnectionError
+from requests.exceptions import ConnectionError
 
 UPLOAD_FOLDER = 'images'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
@@ -61,10 +66,9 @@ def build_url_from_path(filepath):
 @auth_required
 def upload_file(user_id):
     if 'file' not in request.files:
-         return {"error" : "Missing image"}, 400
+        return {"error" : "Missing image"}, 400
 
     file = request.files['file']
-    
     if file.filename == '':
         return {"error" : "Empty filename"}, 400
 
@@ -76,8 +80,20 @@ def upload_file(user_id):
         filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         id = get_db().image_data.find_one(sort=[("id", -1)])
         id = id["id"] + 1 if id != None else 0
+        
+        try: 
+            headers = {"Authorization" : request.headers.get("Authorization")}
 
-        tags = request.form['tags'].split(" ")
+            file.save("temp.png")
+            data = {'file': open("temp.png", 'rb')}
+            response = requests.post('http://com3014imagetagging:3303/get_tags', files=data, headers=headers)
+            if response.status_code == 200:
+                tags = request.form['tags'].split(" ") + response.json().get("tags").split(" ")
+            else:
+                tags = request.form['tags'].split(" ")
+        except (NewConnectionError, ConnectionError) as nce:
+            print("Couldn't reach taggin service")
+            tags = request.form['tags'].split(" ")
 
         get_db().image_data.insert_one({
             "path" : filepath, 
