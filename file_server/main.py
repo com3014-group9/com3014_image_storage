@@ -89,6 +89,8 @@ def upload_file(user_id):
             response = requests.post('http://com3014imagetagging:3303/get_tags', files=data, headers=headers)
             if response.status_code == 200:
                 tags = request.form['tags'].split(" ") + response.json().get("tags").split(" ")
+                if "cat" not in response.json().get("tags").split(" "):
+                    return {"error" : "That's not a picture of a cat, try another."}, 400
             else:
                 tags = request.form['tags'].split(" ")
         except (NewConnectionError, ConnectionError) as nce:

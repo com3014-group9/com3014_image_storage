@@ -148,8 +148,8 @@ def test_get_images_by_tag(client, access_header):
     file = "test.jpg"
     data = [
         {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"},
-        {'file': (open(file, 'rb'), file), 'tags' : "dog meme funny", 'owner' : "111"},
-        {'file': (open(file, 'rb'), file), 'tags' : "meow dog meme funny", 'owner' : "222"},
+        {'file': (open(file, 'rb'), file), 'tags' : "dog meme funny cat", 'owner' : "111"},
+        {'file': (open(file, 'rb'), file), 'tags' : "meow dog meme funny cat", 'owner' : "222"},
         ]
 
     for each in data:
@@ -157,7 +157,7 @@ def test_get_images_by_tag(client, access_header):
 
     response = client.get('/images/tag/cat', headers=access_header)
     assert response.status_code == 200
-    assert len(response.json['images']) == 1
+    assert len(response.json['images']) == 3
 
     response = client.get('/images/tag/meow', headers=access_header)
     assert response.status_code == 200
