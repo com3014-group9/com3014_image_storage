@@ -10,6 +10,8 @@ services:
       - ./file_server:/imager
     links:
       - imager-db
+    networks:
+      - image-net
   imager-db:
     image: mongo:latest
     hostname: test_mongodb
@@ -17,3 +19,8 @@ services:
       - MONGO_INITDB_DATABASE=com3014_images
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=pass
+    networks:
+      - image-net
+networks:
+  image-net:
+    driver: bridge

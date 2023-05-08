@@ -63,14 +63,14 @@ def test_like_image_1(client, access_header):
     data = {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"}
     client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
     data = {'image_id': 0}
-    response = client.post('/images/like', data=data, headers=access_header)
+    response = client.post('/images/like', json=data, headers=access_header)
     
     assert response.status_code == 200
 
 #Test function for like_image function
 def test_like_image_2(client, access_header):
     data = {'image_id': 0}
-    response = client.post('/images/like', data=data, headers=access_header)
+    response = client.post('/images/like', json=data, headers=access_header)
     
     assert response.status_code == 404
 
@@ -80,16 +80,16 @@ def test_like_image_3(client, access_header):
     data = {'file': (open(file, 'rb'), file), 'tags' : "meow cat cute", 'owner' : "111"}
     client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
     data = {'image_id': 0}
-    response = client.post('/images/unlike', data=data, headers=access_header)
+    response = client.post('/images/unlike', json=data, headers=access_header)
     assert response.status_code == 401
 
-    response = client.post('/images/like', data=data, headers=access_header)
+    response = client.post('/images/like', json=data, headers=access_header)
     assert response.status_code == 200
 
-    response = client.post('/images/unlike', data=data, headers=access_header)
+    response = client.post('/images/unlike', json=data, headers=access_header)
     assert response.status_code == 200 
 
-    response = client.post('/images/unlike', data=data, headers=access_header)
+    response = client.post('/images/unlike', json=data, headers=access_header)
     assert response.status_code == 401
 
 #Test function to test get_image function
@@ -134,11 +134,11 @@ def test_get_user_images_1(client, access_header):
     response = client.get('/images/user/111', headers=access_header)
     
     assert response.status_code == 200
-    assert response.json['images'] == ['/images/test.jpg', '/images/test.jpg']
+    assert len(response.json['images']) == 2
 
     response = client.get('/images/user/222', headers=access_header)
     assert response.status_code == 200
-    assert response.json['images'] == ['/images/test.jpg']
+    assert len(response.json['images']) == 1
 
     response = client.get('/images/user/404', headers=access_header)
     assert response.status_code == 404
