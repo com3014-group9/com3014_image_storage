@@ -72,7 +72,7 @@ def upload_file(user_id):
     if file.filename == '':
         return {"error" : "Empty filename"}, 400
 
-    if "owner" not in request.form or "tags" not in request.form:
+    if "owner" not in request.form:
         return {"error" : "Missing fields"}, 400
 
     if file and allowed_file(file.filename):
@@ -94,7 +94,7 @@ def upload_file(user_id):
             else:
                 tags = request.form['tags'].split(" ")
         except (NewConnectionError, ConnectionError) as nce:
-            print("Couldn't reach taggin service")
+            print("Couldn't reach tagging service")
             tags = request.form['tags'].split(" ")
 
         get_db().image_data.insert_one({
@@ -207,7 +207,10 @@ def get_user_images(user_id, owner):
     if len(meow) > 0:
         images = []
         for doc in meow:
-            images.append(build_url_from_path(doc["path"]))
+            images.append({
+                "url": build_url_from_path(doc["path"]),
+                "tags": doc["tags"]
+                })
         return {'images' : images}, 200
     else:
         return send_from_directory("images", "xdd.png"), 404
