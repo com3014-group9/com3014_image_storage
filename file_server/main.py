@@ -72,7 +72,7 @@ def upload_file(user_id):
     if file.filename == '':
         return {"error" : "Empty filename"}, 400
 
-    if "owner" not in request.form:
+    if "owner" not in request.form or "tags" not in request.form:
         return {"error" : "Missing fields"}, 400
 
     if file and allowed_file(file.filename):

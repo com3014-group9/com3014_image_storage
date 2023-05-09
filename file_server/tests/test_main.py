@@ -25,6 +25,7 @@ def test_upload_file_1(client, access_header):
     file = "test.jpg"
     data = {
         'file': (open(file, 'rb'), file),
+        'tags' : "meow cat cute",
         'owner' : "111"
     }
     response = client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
@@ -32,11 +33,24 @@ def test_upload_file_1(client, access_header):
     assert response.status_code == 201
     assert response.json['file'] == file.split('/')[-1]
 
-#Test function to test the upload_file function if owner is missing
+#Test function to test the upload_file function if tags are missing
 def test_upload_file_2(client, access_header):
     file = "test.jpg"
     data = {
         'file': (open(file, 'rb'), file),
+        'owner' : "111"
+    }
+    response = client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
+    
+    assert response.status_code == 400
+    assert response.json['error'] == "Missing fields"
+
+#Test function to test the upload_file function if owner is missing
+def test_upload_file_3(client, access_header):
+    file = "test.jpg"
+    data = {
+        'file': (open(file, 'rb'), file),
+        'tags' : "meow cat cute"
     }
     response = client.post('/images/upload', data=data, content_type='multipart/form-data', headers=access_header)
     
